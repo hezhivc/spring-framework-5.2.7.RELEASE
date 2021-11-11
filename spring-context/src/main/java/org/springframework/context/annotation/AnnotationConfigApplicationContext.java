@@ -104,7 +104,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		 * ② 本类构造函数 初始化注解模式下的 bean定义扫描器
 		 *    this.reader = new AnnotatedBeanDefinitionReader(this);
 		 *    AnnotatedBeanDefinitionReader 构造方法中会注册一些配置的后置处理器
-		 * ③ 本类构造函数 初始化我们的classPath类型的bean定义扫描器
+		 * ③ 本类构造函数 初始化 classPath类型的 bean定义扫描器
 		 *   this.scanner = new ClassPathBeanDefinitionScanner(this);
 		 *   该扫描器主要用来自定义扫描 例如：applicationContext.scan("com.zhe");
 		 */
