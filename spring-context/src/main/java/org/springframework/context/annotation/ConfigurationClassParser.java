@@ -16,29 +16,8 @@
 
 package org.springframework.context.annotation;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.net.UnknownHostException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.function.Predicate;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -59,11 +38,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.env.CompositePropertySource;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.DefaultPropertySourceFactory;
@@ -78,12 +54,14 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.net.UnknownHostException;
+import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Parses a {@link Configuration} class definition, populating a collection of
@@ -170,6 +148,7 @@ class ConfigurationClassParser {
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
+				// 真正的解析bean定义
 				if (bd instanceof AnnotatedBeanDefinition) {
 					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
 				}
@@ -188,7 +167,7 @@ class ConfigurationClassParser {
 						"Failed to parse configuration class [" + bd.getBeanClassName() + "]", ex);
 			}
 		}
-
+		// 处理延时的DeferredImportSelectors,springboot就是通过这步进行记载spring.factories文件中的自定装配的对象
 		this.deferredImportSelectorHandler.process();
 	}
 
@@ -563,34 +542,45 @@ class ConfigurationClassParser {
 		else {
 			this.importStack.push(configClass);
 			try {
+				//获取Import导入进来的所有组件
 				for (SourceClass candidate : importCandidates) {
+					// 判断该组件是不是实现了ImportSelector的
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
+						// 实例化我们的SelectImport组件
 						ImportSelector selector = ParserStrategyUtils.instantiateClass(candidateClass, ImportSelector.class,
 								this.environment, this.resourceLoader, this.registry);
 						Predicate<String> selectorFilter = selector.getExclusionFilter();
 						if (selectorFilter != null) {
 							exclusionFilter = exclusionFilter.or(selectorFilter);
 						}
+						// 判断是不是延时的DeferredImportSelectors，是这个类型 不进行处理
 						if (selector instanceof DeferredImportSelector) {
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
+						// 不是延时的
 						else {
+							// 调用selector的selectImports
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames, exclusionFilter);
+							// SelectImport 导入进来的又是Import进来的 所以递归解析
 							processImports(configClass, currentSourceClass, importSourceClasses, exclusionFilter, false);
 						}
 					}
+					// 判断导入的组件是不是ImportBeanDefinitionRegistrar
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions
 						Class<?> candidateClass = candidate.loadClass();
+						// 实例化ImportBeanDefinitionRegistrar对象
 						ImportBeanDefinitionRegistrar registrar =
 								ParserStrategyUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class,
 										this.environment, this.resourceLoader, this.registry);
+						// 保存ImportBeanDefinitionRegistrar对象
 						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
+					//就是一个普通的组件  但是防止这个普通的组件是一个配置类 所以还是直接走了processConfigurationClass()方法
 					else {
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
@@ -744,7 +734,9 @@ class ConfigurationClassParser {
 
 
 	private class DeferredImportSelectorHandler {
-
+		/**
+		 * 用于来保存延时的ImportSelectors，最最最著名的代表就是我们的SpringBoot自动装配的的类 AutoConfigurationImportSelector
+		 */
 		@Nullable
 		private List<DeferredImportSelectorHolder> deferredImportSelectors = new ArrayList<>();
 
@@ -774,7 +766,9 @@ class ConfigurationClassParser {
 			try {
 				if (deferredImports != null) {
 					DeferredImportSelectorGroupingHandler handler = new DeferredImportSelectorGroupingHandler();
+					// 对多个 DeferredImportSelector进行排序分组
 					deferredImports.sort(DEFERRED_IMPORT_COMPARATOR);
+					// 正在的调用延时的DeferredImportSelector的selectImport方法
 					deferredImports.forEach(handler::register);
 					handler.processGroupImports();
 				}

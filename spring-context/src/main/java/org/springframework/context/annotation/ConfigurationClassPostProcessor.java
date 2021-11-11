@@ -205,6 +205,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 
 	/**
+	 * 由于ConfigurationClassPostProcessor实现了BeanDefinitionRegistryPostProcessor所有执行后置处理器时会执行该方法
 	 * Derive further bean definitions from the configuration classes in the registry.
 	 */
 	@Override
@@ -224,6 +225,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	/**
+	 * BeanDefinitionRegistryPostProcessor 实现了 BeanFactoryPostProcessor 所以会执行该方法
 	 * Prepare the Configuration classes for servicing bean requests at runtime
 	 * by replacing them with CGLIB-enhanced subclasses.
 	 */
@@ -240,7 +242,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			// Simply call processConfigurationClasses lazily at this point then.
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
-
+		// 为属性为full的Bean定义做CGLIB增强
 		enhanceConfigurationClasses(beanFactory);
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
@@ -318,7 +320,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		//do while 会进行第一次解析
 		do {
-			// 真正的解析配置类
+			// 解析配置类
+			// 经过这一步，会将@Component、@Bean、@Import等注解要注册的类扫描出来
 			parser.parse(candidates);
 			parser.validate();
 			// 解析出来的配置类
@@ -331,7 +334,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
-			// 真正的把解析出来的配置类注册到容器中
+			// 把解析出来的配置类注册到容器中
+			// 经过这一步会将@Bean、@import 注册的类变成BeanDefinition
 			this.reader.loadBeanDefinitions(configClasses);
 			// 加入到已经解析的集合中
 			alreadyParsed.addAll(configClasses);
@@ -353,6 +357,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					if (!oldCandidateNames.contains(candidateName)) {
 						BeanDefinition bd = registry.getBeanDefinition(candidateName);
 						// 判断有没有被解析过
+						// checkConfigurationClassCandidate 此时为Bean定义标识为full或lite,在后面根据属性潘森是否需要用CGLIB增强
 						if (ConfigurationClassUtils.checkConfigurationClassCandidate(bd, this.metadataReaderFactory) &&
 								!alreadyParsedClasses.contains(bd.getBeanClassName())) {
 							candidates.add(new BeanDefinitionHolder(bd, candidateName));
@@ -378,6 +383,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	/**
+	 * 为属性为full的Bean定义做CGLIB增强
+	 *
 	 * Post-processes a BeanFactory in search of Configuration class BeanDefinitions;
 	 * any candidates are then enhanced by a {@link ConfigurationClassEnhancer}.
 	 * Candidate status is determined by BeanDefinition attribute metadata.

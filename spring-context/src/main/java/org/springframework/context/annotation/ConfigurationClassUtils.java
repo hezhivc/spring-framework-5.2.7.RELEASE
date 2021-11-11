@@ -73,6 +73,7 @@ abstract class ConfigurationClassUtils {
 
 
 	/**
+	 * 此时为Bean定义标识为full或lite,在后面根据属性潘森是否需要用CGLIB增强
 	 * Check whether the given bean definition is a candidate for a configuration class
 	 * (or a nested component class declared within a configuration/component class,
 	 * to be auto-registered as well), and mark it accordingly.
