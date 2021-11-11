@@ -112,7 +112,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		/**
 		 * 调用父类的构造函数,为ApplicationContext spring上下文对象初始 BeanFactory
 		 * 为啥是DefaultListableBeanFactory？我们去看BeanFactory接口的时候
-		 * 发DefaultListableBeanFactory是最底层的实现，功能是最全的
+		 * 发现DefaultListableBeanFactory是最底层的实现，功能是最全的
 		 */
 		this.beanFactory = new DefaultListableBeanFactory();
 	}

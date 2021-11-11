@@ -100,7 +100,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		 * 调用构造函数
 		 * 主要分三步：
 		 * ① 调用父类构造函数
-		 *    创建 BeanFactory (DefaultListableBeanFactory) 为 ApplicationContext spring上下文对象初始 BeanFactory
+		 *    创建 BeanFactory (DefaultListableBeanFactory) 为 ApplicationContext spring 上下文对象初始 BeanFactory
 		 * ② 本类构造函数 初始化注解模式下的 bean定义扫描器
 		 *    this.reader = new AnnotatedBeanDefinitionReader(this);
 		 *    AnnotatedBeanDefinitionReader 构造方法中会注册一些配置的后置处理器

@@ -163,7 +163,7 @@ public abstract class AnnotationConfigUtils {
 
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 		/**
-		 * 为容器中注册了解析配置类的后置处理器 ConfigurationClassPostProcessor
+		 * 为容器中注册解析配置类的后置处理器 ConfigurationClassPostProcessor
 		 * 名字叫:org.springframework.context.annotation.internalConfigurationAnnotationProcessor
 		 */
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
@@ -180,6 +180,16 @@ public abstract class AnnotationConfigUtils {
 			def.setSource(source);
 			beanDefs.add(registerPostProcessor(registry, def, AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
+
+		/**
+		 * 为我们容器中注册处理@Required属性的注解处理器RequiredAnnotationBeanPostProcessor
+		 * 名字叫:org.springframework.context.annotation.internalRequiredAnnotationProcessor
+		 */
+//		if (!registry.containsBeanDefinition(REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
+//			RootBeanDefinition def = new RootBeanDefinition(RequiredAnnotationBeanPostProcessor.class);
+//			def.setSource(source);
+//			beanDefs.add(registerPostProcessor(registry, def, REQUIRED_ANNOTATION_PROCESSOR_BEAN_NAME));
+//		}
 
 		/**
 		 * 为容器注册处理JSR规范的注解处理器CommonAnnotationBeanPostProcessor
@@ -210,6 +220,7 @@ public abstract class AnnotationConfigUtils {
 		}
 		/**
 		 * 处理监听方法的注解解析器EventListenerMethodProcessor
+		 * org.springframework.context.event.internalEventListenerProcessor
 		 */
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(EventListenerMethodProcessor.class);
@@ -218,6 +229,7 @@ public abstract class AnnotationConfigUtils {
 		}
 		/**
 		 * 注册事件监听器工厂
+		 * org.springframework.context.event.internalEventListenerFactory
 		 */
 		if (!registry.containsBeanDefinition(EVENT_LISTENER_FACTORY_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(DefaultEventListenerFactory.class);
