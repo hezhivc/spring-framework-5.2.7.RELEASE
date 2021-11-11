@@ -16,17 +16,10 @@
 
 package org.springframework.context.annotation;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionDefaults;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.*;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
@@ -34,6 +27,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.PatternMatchUtils;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * A bean definition scanner that detects bean candidates on the classpath,
@@ -156,16 +152,22 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @param resourceLoader the {@link ResourceLoader} to use
 	 * @since 4.3.6
 	 */
+	// ClassPathBeanDefinitionScanner就是用来扫描我们classpath下的标注了@Service @Compent @Respository @Controller
+	// environment 环境对象
 	public ClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, boolean useDefaultFilters,
 			Environment environment, @Nullable ResourceLoader resourceLoader) {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
-
+		/**
+		 * 设置默认的扫描规则为true的话 默认是扫描所有的  若使用 includeFilters 来表示只包含需要设置为false
+		 */
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
+		// 设置环境对象
 		setEnvironment(environment);
+		// 设置资源加载器
 		setResourceLoader(resourceLoader);
 	}
 
@@ -244,20 +246,29 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 
 	/**
+	 * 方法实现说明:真正的扫描我们@MapperScan的backpackage指定的路径的
 	 * Perform a scan within the specified base packages.
+	 * @param basePackages 包的路径
 	 * @param basePackages the packages to check for annotated classes
 	 * @return number of beans registered
 	 */
 	public int scan(String... basePackages) {
+		/**
+		 * 还没有扫描mapper包之前 容器中所有的bean定义个数
+		 */
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
-
+		/**
+		 * 真正的扫描我们的mapper包的mapper类
+		 */
 		doScan(basePackages);
-
+		// 注册系统中的配置类处理器
 		// Register annotation config processors, if necessary.
 		if (this.includeAnnotationConfig) {
 			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 		}
-
+		/**
+		 * 返回扫描出mapper的bean定义的个数
+		 */
 		return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
 	}
 
@@ -271,19 +282,26 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
+		// 创建bean定义的holder对象用于保存扫描后生成的bean定义对象
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
+		// 循环包路径集合
 		for (String basePackage : basePackages) {
+			// 找到候选的Components
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
+				// 设置beanName
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+				// 处理@AutoWired相关的
 				if (candidate instanceof AbstractBeanDefinition) {
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
+				// 处理jsr250相关的组件
 				if (candidate instanceof AnnotatedBeanDefinition) {
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				//把解析出来的组件bean定义注册到IOC容器中
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
 					definitionHolder =

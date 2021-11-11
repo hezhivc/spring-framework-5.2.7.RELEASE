@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("cn.zhe")
 public class MainStartTest {
 	public static void main(String[] args) {
-		AnnotationConfigApplicationContext applicationContext =
-				new AnnotationConfigApplicationContext(MainStartTest.class);
+		// SpringIOC
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(MainStartTest.class);
 		HelloSpring bean = applicationContext.getBean(HelloSpring.class);
 		bean.sayHello();
 	}
