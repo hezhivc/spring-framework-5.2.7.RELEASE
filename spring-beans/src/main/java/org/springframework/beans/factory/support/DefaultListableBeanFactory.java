@@ -1275,7 +1275,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Object instanceCandidate;
 			// 如果找到多个
 			if (matchingBeans.size() > 1) {
-				//确认给定 bean autowire 的候选者，按照 @Primary 和 @Priority 的顺序
+				// 确认给定 bean autowire 的候选者，按照 @Primary 和 @Priority 的顺序
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (autowiredBeanName == null) {
 					if (isRequired(descriptor) || !indicatesMultipleBeans(type)) {

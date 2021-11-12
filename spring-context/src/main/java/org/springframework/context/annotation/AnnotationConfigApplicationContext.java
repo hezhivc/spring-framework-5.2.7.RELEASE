@@ -52,13 +52,9 @@ import java.util.function.Supplier;
  * @see org.springframework.context.support.GenericXmlApplicationContext
  */
 public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
-	/**
-	 * 注解的bean定义读取器
-	 */
+	// 注解bean定义读取器，主要作用是用来读取被注解的了Bean
 	private final AnnotatedBeanDefinitionReader reader;
-	/**
-	 * 类路径下的bean定义扫描器
-	 */
+	// 外部调用scan手动扫描的scanner对象,用处不大
 	private final ClassPathBeanDefinitionScanner scanner;
 
 
@@ -99,20 +95,26 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 		/**
 		 * 调用构造函数
 		 * 主要分三步：
-		 * ① 调用父类构造函数
-		 *    创建 BeanFactory (DefaultListableBeanFactory) 为 ApplicationContext spring 上下文对象初始 BeanFactory
-		 * ② 本类构造函数 初始化注解模式下的 bean定义扫描器
+		 * a.调用父类构造函数
+		 *    创建 BeanFactory (DefaultListableBeanFactory) 为 ApplicationContext
+		 *    spring 上下文对象初始 BeanFactory
+		 * b.本类构造函数 初始化注解模式下的 bean定义扫描器
 		 *    this.reader = new AnnotatedBeanDefinitionReader(this);
 		 *    AnnotatedBeanDefinitionReader 构造方法中会注册一些配置的后置处理器
-		 * ③ 本类构造函数 初始化 classPath类型的 bean定义扫描器
+		 * c.本类构造函数 初始化 classPath类型的 bean定义扫描器
 		 *   this.scanner = new ClassPathBeanDefinitionScanner(this);
 		 *   该扫描器主要用来自定义扫描 例如：applicationContext.scan("com.zhe");
 		 */
 		this();
 		/**
-		 * 注册我们的配置类
-		 * 前面 this() 初始化了 bean 定义扫描器，在这里扫描注册 bean
-		 * this.reader.register(componentClasses)
+		 * 注册配置类
+		 * 把传入的类进行注册，分为两种情况
+		 *     a. @Configuration的配置类
+		 *     b. 传入普通 Bean (基本不会这么做)
+		 *	Spring把配置类分为两种
+		 *     a. 带@Configuration注解的配置类称之为FULL配置类
+		 *     b. 不带@Configuration注解，是带有@Component，@Import，@ImportResouce，
+		 *        @Service， @ComponentScan等注解的配置类称之为Lite配置类
 		 */
 		register(componentClasses);
 		/**

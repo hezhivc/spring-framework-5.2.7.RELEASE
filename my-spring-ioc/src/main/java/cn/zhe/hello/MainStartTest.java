@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("cn.zhe")
 public class MainStartTest {
 	public static void main(String[] args) {
-		// SpringIOC
+		// SpringIOC 出发点
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(MainStartTest.class);
 		HelloSpring bean = applicationContext.getBean(HelloSpring.class);
 		bean.sayHello();
