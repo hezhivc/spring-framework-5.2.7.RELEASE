@@ -64,7 +64,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 */
 	public AnnotationConfigApplicationContext() {
 		/**
-		 * 初始化注解模式下的bean定义扫描器
+		 * 实例化 BeanDefinition 读取器 (AnnotatedBeanDefinitionReader)
 		 * 调用AnnotatedBeanDefinitionReader构造方法，传入的是this(AnnotationConfigApplicationContext)对象
 		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);

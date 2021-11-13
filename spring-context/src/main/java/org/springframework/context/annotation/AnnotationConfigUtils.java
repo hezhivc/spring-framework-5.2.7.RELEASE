@@ -240,6 +240,22 @@ public abstract class AnnotationConfigUtils {
 		return beanDefs;
 	}
 
+	/**
+	 * 这方法为BeanDefinition设置了一个Role，ROLE_INFRASTRUCTURE代表这是spring内部的，并非用户定义的
+	 * registry.registerBeanDefinition(beanName, definition);是一个接口方法，
+	 * 实现类是 DefaultListableBeanFactory
+	 *    核心工作就是
+	 *    a.this.beanDefinitionMap.put(beanName, beanDefinition);
+	 *      把beanName作为key，beanDefinition作为value，放到map里面
+	 *    b.beanDefinitionNames就是一个List<String>,这里就是把beanName放到List中去
+	 * DefaultListableBeanFactory就是我们所说的容器,里面放着beanDefinitionMap， beanDefinitionNames，
+	 *      beanDefinitionMap是一个hashMap，beanName作为Key,beanDefinition作为Value，
+	 *      beanDefinitionNames是一个集合，里面存放了beanName
+	 * @param registry
+	 * @param definition
+	 * @param beanName
+	 * @return
+	 */
 	private static BeanDefinitionHolder registerPostProcessor(
 			BeanDefinitionRegistry registry, RootBeanDefinition definition, String beanName) {
 

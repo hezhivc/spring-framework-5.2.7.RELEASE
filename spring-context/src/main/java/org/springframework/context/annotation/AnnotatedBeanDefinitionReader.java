@@ -58,6 +58,7 @@ public class AnnotatedBeanDefinitionReader {
 
 
 	/**
+	 * 实例化 BeanDefinition 读取器 (AnnotatedBeanDefinitionReader)
 	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry.
 	 * <p>If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
 	 * the {@link Environment} will be inherited, otherwise a new
@@ -72,6 +73,7 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
+	 * 实例化 BeanDefinition 读取器 (AnnotatedBeanDefinitionReader)
 	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry,
 	 * using the given {@link Environment}.
 	 * @param registry the {@code BeanFactory} to load bean definitions into,
@@ -87,7 +89,7 @@ public class AnnotatedBeanDefinitionReader {
 		this.registry = registry;
 		// 用户处理条件表达式计算 @Condition
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
-		// 注册一些配置的后置处理器
+		// 注册一些配置的后置处理器，并注册Spring内置的多个Bean
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
