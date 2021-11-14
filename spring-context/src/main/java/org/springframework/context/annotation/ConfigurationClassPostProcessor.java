@@ -321,7 +321,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		//do while 会进行第一次解析
 		do {
 			// 解析配置类
-			// 经过这一步，会将@Component、@Bean、@Import等注解要注册的类扫描出来
+			// 经过这一步，会将@ComponentScans、@ComponentScan、@Bean、@Import等注解要注册的类扫描出来
 			parser.parse(candidates);
 			parser.validate();
 			// 解析出来的配置类
