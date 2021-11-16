@@ -125,8 +125,10 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 		}
 		try {
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			// 为容器设置一个序列化ID
 			beanFactory.setSerializationId(getId());
 			customizeBeanFactory(beanFactory);
+			// 加载我们的bean定义(最最最主要的作用就是保存我们的传递进去的配置类)
 			loadBeanDefinitions(beanFactory);
 			this.beanFactory = beanFactory;
 		}

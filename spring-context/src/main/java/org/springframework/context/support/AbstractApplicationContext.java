@@ -656,7 +656,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.setBeanClassLoader(getClassLoader());
 		// 为bean工厂设置我们标准的SPEL表达式解析器对象StandardBeanExpressionResolver
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
-		// 为我们的bean工厂设置了一个propertityEditor 属性资源编辑器对象(用于后面的给bean对象赋值使用)
+		// 为我们的bean工厂设置了一个propertyEditor 属性资源编辑器对象(用于后面的给bean对象赋值使用)
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
@@ -665,7 +665,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 		/**
-		 * 当 Spring 将 Applie础onContextAwareProcessor 注册后，那么在 invokeAwarelnterfaces 方法中间接调用的 Aware 类已经不是普通的 bean 了 ，
+		 * 当 Spring 将 Applie础onContextAwareProcessor 注册后，那么在 invokeAwareInterfaces 方法中间接调
+		 * 用的 Aware 类已经不是普通的 bean 了 ，
 		 * 如 ResourceLoaderAware、 ApplicationEventPublisher 等，那么当然需要在 Spring 做 bean 的依赖注入的时候忽略它们。
 		 * 而 ignoreDependencyInterface 的作用正是在此
 		 */
@@ -727,6 +728,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * 调用Bean工厂的后置处理器.
+	 * 执行自定义的 BeanFactoryProcessor 和内置的 BeanFactoryProcessor
 	 * Instantiate and invoke all registered BeanFactoryPostProcessor beans,
 	 * respecting explicit order if given.
 	 * <p>Must be called before singleton instantiation.
